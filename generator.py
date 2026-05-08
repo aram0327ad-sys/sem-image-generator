@@ -596,14 +596,19 @@ def generate_image(cfg):
 
     img = Image.new("L", (W, W), random.randint(55, 85))
     draw = ImageDraw.Draw(img)
+    
+    particles = []
+    voids = []
 
-    particles = generate_base_particles(cfg)
-    particles = add_agglomerates(particles, cfg)
-    particles += generate_network_particles(cfg, mode)
+    if cfg.get("use_filler", True):
+        particles = generate_base_particles(cfg)
+        particles = add_agglomerates(particles, cfg)
+        particles += generate_network_particles(cfg, mode)
 
-    voids = generate_voids(cfg, mode)
-
-    random.shuffle(particles)
+    if cfg.get("use_void", True):
+        voids = generate_voids(cfg, mode)
+        
+        random.shuffle(particles)
 
     for p in particles:
         draw_particle(draw, p)
@@ -699,13 +704,16 @@ def generate_dataset(cfg):
         zip_dataset(out, cfg["zip_name"])
 
 
-def run_generation(num_images):
+def run_generation(num_images, use_filler=True, use_void=True):
     cfg = CONFIG.copy()
+
+    cfg["num_images"] = int(num_images)
+    cfg["use_filler"] = use_filler
+    cfg["use_void"] = use_void
 
     output_dir = f"synthetic_sem_dataset_{num_images}"
     zip_name = f"synthetic_sem_dataset_{num_images}.zip"
 
-    cfg["num_images"] = int(num_images)
     cfg["output_dir"] = output_dir
     cfg["zip_name"] = zip_name
     cfg["make_zip"] = True
@@ -713,5 +721,4 @@ def run_generation(num_images):
     generate_dataset(cfg)
 
     zip_path = os.path.join(output_dir, zip_name)
-
     return zip_path, output_dir
