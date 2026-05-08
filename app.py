@@ -29,9 +29,23 @@ num_images = st.number_input(
 
 st.info("Input range: 1 to 1000 images")
 
+st.subheader("Phase selection")
+
+use_filler = st.checkbox("Filler 생성", value=True)
+use_void = st.checkbox("Void 생성", value=True)
+
+if not use_filler and not use_void:
+    st.warning("Filler 또는 Void 중 최소 하나는 선택하는 것을 권장합니다.")
+
+
 if st.button("Generate Dataset"):
     with st.spinner("Generating images... This may take several minutes depending on the number of images."):
-        zip_path, output_dir = run_generation(num_images)
+
+        zip_path, output_dir = run_generation(
+            num_images=num_images,
+            use_filler=use_filler,
+            use_void=use_void
+        )
 
     st.success(f"Dataset generation completed: {num_images} images")
 
@@ -44,3 +58,4 @@ if st.button("Generate Dataset"):
         )
 
     st.write("Output folder:", output_dir)
+
